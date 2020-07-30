@@ -1,15 +1,14 @@
-import React from "react";
 // optional polyfill: Optionally add the polyfill and make sure it's
 // required on your dependendencies for unsupporting browsers
-import "intersection-observer";
-
+import 'intersection-observer';
+import React from 'react';
 import {
+  DragSelectableProps,
+  DragSelectableState,
   MouseDragDirection,
   SelectorPosition,
-  DragSelectableProps,
-  DragSelectableState
-} from "./types";
-import { areObjectsEqual } from "./utils";
+} from './types';
+import { areObjectsEqual } from './utils';
 
 export default class ReactDragSelectable extends React.PureComponent<
   DragSelectableProps,
@@ -19,7 +18,7 @@ export default class ReactDragSelectable extends React.PureComponent<
     containerTop: 0,
     containerLeft: 0,
     onScreenElements: [],
-    observerIdsCache: []
+    observerIdsCache: [],
   };
 
   private selector: HTMLElement | null = null;
@@ -38,16 +37,16 @@ export default class ReactDragSelectable extends React.PureComponent<
   componentDidMount(): void {
     const { container } = this.props;
     if (container) {
-      container.addEventListener("mousedown", this.handleMouseDown);
+      container.addEventListener('mousedown', this.handleMouseDown);
     }
   }
 
   UNSAFE_componentWillReceiveProps(
-    nextProps: Readonly<DragSelectableProps>,
+    nextProps: Readonly<DragSelectableProps> | any,
     nextContext: any
   ): void {
     if (nextProps.container && nextProps.container !== this.props.container) {
-      nextProps.container.addEventListener("mousedown", this.handleMouseDown);
+      nextProps.container.addEventListener('mousedown', this.handleMouseDown);
 
       // set container offset if container is not Document
       if (nextProps.container instanceof HTMLElement) {
@@ -56,18 +55,18 @@ export default class ReactDragSelectable extends React.PureComponent<
           .toJSON();
         this.setState({
           containerTop: containerRect.top,
-          containerLeft: containerRect.left
+          containerLeft: containerRect.left,
         });
       }
     }
 
     if (!areObjectsEqual(nextProps.selectables, this.props.selectables)) {
-      Object.keys(nextProps.selectables).forEach(id => {
+      Object.keys(nextProps.selectables).forEach((id) => {
         const element = nextProps.selectables[id];
         if (this.state.observerIdsCache.indexOf(id) === -1 && element) {
           this.setState(
             {
-              observerIdsCache: [...this.state.observerIdsCache, id]
+              observerIdsCache: [...this.state.observerIdsCache, id],
             },
             () => {
               this.observer.observe(element);
@@ -78,39 +77,39 @@ export default class ReactDragSelectable extends React.PureComponent<
     }
   }
 
-  private observer = new IntersectionObserver(entries => {
-    console.log("called observer");
-    entries.forEach(entry => {
+  private observer = new IntersectionObserver((entries) => {
+    console.log('called observer');
+    entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        entry.target.classList.add("element__selectable");
+        entry.target.classList.add('element__selectable');
         if (
-          this.state.onScreenElements.indexOf(entry.target as
-            | HTMLElement
-            | SVGAElement) === -1
+          this.state.onScreenElements.indexOf(
+            entry.target as HTMLElement | SVGAElement
+          ) === -1
         ) {
           this.setState(
             {
               onScreenElements: this.state.onScreenElements.concat(
                 entry.target as HTMLElement | SVGAElement
-              ) // [...this.state.onScreenElements, entry.target as HTMLElement | SVGAElement],
+              ), // [...this.state.onScreenElements, entry.target as HTMLElement | SVGAElement],
             },
             () => {
-              if (typeof this.props.onVisibleElementsChange === "function") {
+              if (typeof this.props.onVisibleElementsChange === 'function') {
                 this.props.onVisibleElementsChange(this.state.onScreenElements);
               }
             }
           );
         }
       } else {
-        entry.target.classList.remove("element__selectable");
+        entry.target.classList.remove('element__selectable');
         this.setState(
           {
             onScreenElements: this.state.onScreenElements.filter(
-              e => e !== entry.target
-            )
+              (e) => e !== entry.target
+            ),
           },
           () => {
-            if (typeof this.props.onVisibleElementsChange === "function") {
+            if (typeof this.props.onVisibleElementsChange === 'function') {
               this.props.onVisibleElementsChange(this.state.onScreenElements);
             }
           }
@@ -122,7 +121,7 @@ export default class ReactDragSelectable extends React.PureComponent<
   componentWillUnmount(): void {
     const { container } = this.props;
     if (container) {
-      container.removeEventListener("mousedown", this.handleMouseDown);
+      container.removeEventListener('mousedown', this.handleMouseDown);
     }
 
     if (this.observer) {
@@ -147,10 +146,10 @@ export default class ReactDragSelectable extends React.PureComponent<
 
   isRightClick = (event: any) => {
     let isRightMB = false;
-    if ("which" in event) {
+    if ('which' in event) {
       // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
       isRightMB = event.which === 3;
-    } else if ("button" in event) {
+    } else if ('button' in event) {
       // IE, Opera
       isRightMB = event.button === 2;
     }
@@ -159,7 +158,7 @@ export default class ReactDragSelectable extends React.PureComponent<
 
   handleClick = (event: MouseEvent) => {
     if (this.mouseInteraction) {
-      alert("xxx");
+      alert('xxx');
     }
 
     if (this.isRightClick(event)) {
@@ -169,7 +168,7 @@ export default class ReactDragSelectable extends React.PureComponent<
     const { selectAbleClass, onSelectChange } = this.props;
 
     const target = event.target as HTMLElement | SVGAElement;
-    if (typeof onSelectChange === "function") {
+    if (typeof onSelectChange === 'function') {
       const newTarget =
         target && target.classList.contains(selectAbleClass) ? target : null;
       onSelectChange(newTarget, event);
@@ -178,7 +177,7 @@ export default class ReactDragSelectable extends React.PureComponent<
 
   private _startUp: any = (event: MouseEvent) => this.startUp(event);
   private startUp(event: MouseEvent) {
-    if (event.type === "touchstart") {
+    if (event.type === 'touchstart') {
       event.preventDefault();
     }
 
@@ -194,9 +193,9 @@ export default class ReactDragSelectable extends React.PureComponent<
 
     if (this.props.container) {
       /*eslint-disable no-underscore-dangle*/
-      this.props.container.removeEventListener("mousedown", this._startUp);
-      this.props.container.addEventListener("mousemove", this._handleMove);
-      this.props.container.addEventListener("mouseup", this._end);
+      this.props.container.removeEventListener('mousedown', this._startUp);
+      this.props.container.addEventListener('mousemove', this._handleMove);
+      this.props.container.addEventListener('mouseup', this._end);
       /*eslint-enable*/
     }
   }
@@ -212,15 +211,15 @@ export default class ReactDragSelectable extends React.PureComponent<
       const selectorPos = this._getPosition(event);
 
       const elements = this.getElementsInArea(selectorPos);
-      if (typeof onMultipleSelectChange === "function") {
+      if (typeof onMultipleSelectChange === 'function') {
         onMultipleSelectChange(elements, event);
       }
 
       if (this.selector) {
-        this.selector.className = "";
-        this.selector.classList.add("lf__selector");
+        this.selector.className = '';
+        this.selector.classList.add('lf__selector');
         this.selector.classList.add(`mouse__drag_${selectorPos.direction}`);
-        this.selector.style.display = "block"; // hidden unless moved, fix for issue #8
+        this.selector.style.display = 'block'; // hidden unless moved, fix for issue #8
 
         this.updatePos(this.selector, selectorPos);
       }
@@ -241,7 +240,7 @@ export default class ReactDragSelectable extends React.PureComponent<
     // if area or document is scrolled those values have to be included aswell
     const scrollAmount = {
       x: scrollNew.x - this.initialScroll.x,
-      y: scrollNew.y - this.initialScroll.y
+      y: scrollNew.y - this.initialScroll.y,
     };
 
     const selectorPos: SelectorPosition = {
@@ -249,7 +248,7 @@ export default class ReactDragSelectable extends React.PureComponent<
       y: 0,
       w: 0,
       h: 0,
-      direction: "LeftUp"
+      direction: 'LeftUp',
     };
 
     const isAboveX = cursorPosNew.x > this.initialCursorPos.x - scrollAmount.x;
@@ -270,8 +269,8 @@ export default class ReactDragSelectable extends React.PureComponent<
       : this.initialCursorPos.y - cursorPosNew.y - scrollAmount.y;
 
     let direction;
-    direction = cursorPosNew.x - this.initialCursorPos.x > 0 ? "Left" : "Right";
-    direction += cursorPosNew.y - this.initialCursorPos.y > 0 ? "Down" : "Up";
+    direction = cursorPosNew.x - this.initialCursorPos.x > 0 ? 'Left' : 'Right';
+    direction += cursorPosNew.y - this.initialCursorPos.y > 0 ? 'Down' : 'Up';
     selectorPos.direction = direction as MouseDragDirection;
 
     return selectorPos;
@@ -291,7 +290,7 @@ export default class ReactDragSelectable extends React.PureComponent<
       y: 0,
       w: 0,
       h: 0,
-      direction: "LeftUp"
+      direction: 'LeftUp',
     };
     selectorPos.x = this.initialCursorPos.x + this.initialScroll.x;
     selectorPos.y = this.initialCursorPos.y + this.initialScroll.y;
@@ -317,7 +316,7 @@ export default class ReactDragSelectable extends React.PureComponent<
     if (pos) {
       return {
         x: pos.x + scroll.x,
-        y: pos.y + scroll.y
+        y: pos.y + scroll.y,
       };
     }
 
@@ -332,7 +331,7 @@ export default class ReactDragSelectable extends React.PureComponent<
     const cPos = {
       // event.clientX/Y fallback for <IE8
       x: event.pageX || event.clientX,
-      y: event.pageY || event.clientY
+      y: event.pageY || event.clientY,
     };
 
     const areaRect = this.getAreaRect(area || document);
@@ -345,7 +344,7 @@ export default class ReactDragSelectable extends React.PureComponent<
           this.zoom,
         y:
           (cPos.y - areaRect.top - docScroll.y + this.state.containerTop) /
-          this.zoom
+          this.zoom,
       };
     }
 
@@ -361,7 +360,7 @@ export default class ReactDragSelectable extends React.PureComponent<
       left:
         document.body.scrollLeft > 0
           ? document.body.scrollLeft
-          : document.documentElement.scrollLeft
+          : document.documentElement.scrollLeft,
     };
 
     let x;
@@ -393,7 +392,7 @@ export default class ReactDragSelectable extends React.PureComponent<
         x:
           area.documentElement.clientWidth > 0
             ? area.documentElement.clientWidth
-            : window.innerWidth
+            : window.innerWidth,
       };
       return {
         top: 0,
@@ -401,7 +400,7 @@ export default class ReactDragSelectable extends React.PureComponent<
         bottom: 0,
         right: 0,
         width: size.x,
-        height: size.y
+        height: size.y,
       };
     } else if (area instanceof HTMLElement) {
       const rect = area.getBoundingClientRect();
@@ -411,7 +410,7 @@ export default class ReactDragSelectable extends React.PureComponent<
         bottom: rect.bottom,
         right: rect.right,
         width: area.clientWidth || rect.width,
-        height: area.clientHeight || rect.height
+        height: area.clientHeight || rect.height,
       };
     }
 
@@ -436,17 +435,17 @@ export default class ReactDragSelectable extends React.PureComponent<
     }
     const tolerance = {
       x: Math.min(areaRect.width / 10, 30),
-      y: Math.min(areaRect.height / 10, 30)
+      y: Math.min(areaRect.height / 10, 30),
     };
 
     if (cursorPosition.y < tolerance.y) {
-      return "top";
+      return 'top';
     } else if (areaRect.height - cursorPosition.y < tolerance.y) {
-      return "bottom";
+      return 'bottom';
     } else if (areaRect.width - cursorPosition.x < tolerance.x) {
-      return "right";
+      return 'right';
     } else if (cursorPosition.x < tolerance.x) {
-      return "left";
+      return 'left';
     }
     return false;
   };
@@ -458,34 +457,34 @@ export default class ReactDragSelectable extends React.PureComponent<
    */
   autoScroll = (event: MouseEvent) => {
     const edge = this.isCursorNearEdge(event, this.props.container);
-    const docEl =
-      document &&
-      document.documentElement &&
-      document.documentElement.scrollTop &&
-      document.documentElement;
+    // const docEl =
+    //   document &&
+    //   document.documentElement &&
+    //   document.documentElement.scrollTop &&
+    //   document.documentElement;
 
     /*eslint-disable no-underscore-dangle*/
     const _area = document.documentElement; // this.props.container === document ? docEl || document.body : this.props.container;
     if (!_area) {
       return;
     }
-    if (edge === "top" && _area.scrollTop > 0) {
+    if (edge === 'top' && _area.scrollTop > 0) {
       _area.scrollTop -= Number(this.autoScrollSpeed);
-    } else if (edge === "bottom") {
+    } else if (edge === 'bottom') {
       _area.scrollTop += Number(this.autoScrollSpeed);
-    } else if (edge === "left" && _area.scrollLeft > 0) {
+    } else if (edge === 'left' && _area.scrollLeft > 0) {
       _area.scrollLeft -= Number(this.autoScrollSpeed);
-    } else if (edge === "right") {
+    } else if (edge === 'right') {
       _area.scrollLeft += Number(this.autoScrollSpeed);
     }
     /*eslint-enable*/
   };
 
   updatePos = (node: HTMLElement, pos: SelectorPosition) => {
-    node.style.left = pos ? pos.x + "px" : "0";
-    node.style.top = pos.y + "px";
-    node.style.width = pos.w + "px";
-    node.style.height = pos.h + "px";
+    node.style.left = pos ? pos.x + 'px' : '0';
+    node.style.top = pos.y + 'px';
+    node.style.width = pos.w + 'px';
+    node.style.height = pos.h + 'px';
     return node;
   };
 
@@ -494,9 +493,9 @@ export default class ReactDragSelectable extends React.PureComponent<
     /*eslint-disable no-underscore-dangle*/
     if (this.props.container) {
       this.previousCursorPos = this._getCursorPos(event, this.props.container);
-      this.props.container.removeEventListener("mouseup", this._end);
-      this.props.container.removeEventListener("mousemove", this._handleMove);
-      this.props.container.addEventListener("mousedown", this._startUp);
+      this.props.container.removeEventListener('mouseup', this._end);
+      this.props.container.removeEventListener('mousemove', this._handleMove);
+      this.props.container.addEventListener('mousedown', this._startUp);
     }
 
     if (this.break) {
@@ -515,18 +514,18 @@ export default class ReactDragSelectable extends React.PureComponent<
 
   private resetSelector() {
     if (this.selector) {
-      this.selector.style.width = "0";
-      this.selector.style.height = "0";
-      this.selector.style.left = "0";
-      this.selector.style.right = "0";
-      this.selector.style.top = "0";
-      this.selector.style.display = "none";
+      this.selector.style.width = '0';
+      this.selector.style.height = '0';
+      this.selector.style.left = '0';
+      this.selector.style.right = '0';
+      this.selector.style.top = '0';
+      this.selector.style.display = 'none';
     }
   }
 
   public getElementsInArea = ({ x, y, w, h, direction }: SelectorPosition) => {
-    const crossingSelect = direction === "RightUp" || direction === "RightDown";
-    return this.state.onScreenElements.filter(element => {
+    const crossingSelect = direction === 'RightUp' || direction === 'RightDown';
+    return this.state.onScreenElements.filter((element: any) => {
       const bound = element.getBoundingClientRect().toJSON();
 
       const scrollLeft =
@@ -561,7 +560,8 @@ export default class ReactDragSelectable extends React.PureComponent<
         } else if (
           bound.left > x &&
           bound.left + bound.width < x + w &&
-          (bound.top > y && bound.top + bound.height < y + h)
+          bound.top > y &&
+          bound.top + bound.height < y + h
         ) {
           return element;
         }
@@ -577,13 +577,13 @@ export default class ReactDragSelectable extends React.PureComponent<
         <div
           ref={this.handleRef}
           id="lf-selector"
-          style={{ display: "none" }}
+          style={{ display: 'none' }}
         />
         <div
           style={{
-            position: "fixed",
+            position: 'fixed',
             top: 30,
-            right: 15
+            right: 15,
           }}
         >
           {`Selectables: ${this.state.onScreenElements.length}`}

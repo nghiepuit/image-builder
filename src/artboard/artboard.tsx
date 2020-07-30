@@ -1,20 +1,18 @@
 // Copyright (c) 2019-present Ladifire, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import React from "react";
-import classNames from "classnames";
-import KeyController from "keycon";
-import { ref } from "framework-utils";
-import { Frame, setAlias } from "scenejs";
-
-import ReactDragSelectable from "../full-drag-select";
-import MoveAble, { OnRotateStart } from "react-moveable";
-import Guides from "../guides";
-import {
+import classNames from 'classnames';
+import { ref } from 'framework-utils';
+import KeyController from 'keycon';
+import React from 'react';
+import MoveAble, {
   MoveableManagerProps,
+  OnClickGroup,
   OnDrag,
   OnDragGroupEnd,
   OnDragGroupStart,
   OnDragStart,
+  OnRender,
+  OnRenderGroup,
   OnResize,
   OnResizeGroup,
   OnResizeGroupStart,
@@ -23,26 +21,23 @@ import {
   OnRotateGroup,
   OnRotateGroupEnd,
   OnRotateGroupStart,
-  OnRender,
-  OnRenderGroup,
-  OnClick,
-  OnClickGroup
-} from "react-moveable";
+  OnRotateStart,
+} from 'react-moveable';
+import { Frame, setAlias } from 'scenejs';
+import BaseElement from '../elements/base-elements';
+import '../elements/base-elements/style.scss';
+import ReactDragSelectable from '../full-drag-select';
+import Guides from '../guides';
+import './style.scss';
+import { Targets } from './type';
 
-import { ArtBoardContentType, Targets } from "./type";
-import BaseElement from "../elements/base-elements";
-import { ElementType } from "../elements/base-elements/type";
-
-import "./style.scss";
-import "../elements/base-elements/style.scss";
-
-setAlias("tx", ["transform", "translateX"]);
-setAlias("ty", ["transform", "translateY"]);
-setAlias("tz", ["transform", "translateZ"]);
-setAlias("rotate", ["transform", "rotate"]);
-setAlias("sx", ["transform", "scaleX"]);
-setAlias("sy", ["transform", "scaleY"]);
-setAlias("matrix3d", ["transform", "matrix3d"]);
+setAlias('tx', ['transform', 'translateX']);
+setAlias('ty', ['transform', 'translateY']);
+setAlias('tz', ['transform', 'translateZ']);
+setAlias('rotate', ['transform', 'rotate']);
+setAlias('sx', ['transform', 'scaleX']);
+setAlias('sy', ['transform', 'scaleY']);
+setAlias('matrix3d', ['transform', 'matrix3d']);
 
 type ArtBoardProps = {
   /** Desktop, tablet or mobile view */
@@ -84,7 +79,7 @@ export default class ArtBoard extends React.PureComponent<
   ArtBoardState
 > {
   static defaultProps: ArtBoardProps = {
-    viewMode: "desktop"
+    viewMode: 'desktop',
   };
 
   state: ArtBoardState = {
@@ -92,14 +87,14 @@ export default class ArtBoard extends React.PureComponent<
     hasElementResizing: false,
     frame: {
       translate: [0, 0, 0],
-      rotate: 0
+      rotate: 0,
     },
     showRuler: true,
     selectables: {},
     lastSelectElement: {
       time: 0,
-      element: null
-    }
+      element: null,
+    },
   };
 
   /** MoveAble tooltip */
@@ -112,7 +107,7 @@ export default class ArtBoard extends React.PureComponent<
   private guides1: Guides | null = null;
   private guides2: Guides | null = null;
   private handleRenderGroup: any = ({ targets }: OnRenderGroup) => {
-    targets.forEach(target => this.handleRender({ target }));
+    targets.forEach((target) => this.handleRender({ target }));
   };
 
   /**
@@ -120,12 +115,12 @@ export default class ArtBoard extends React.PureComponent<
   newFrame = (el: HTMLElement | SVGAElement) => {
     const frame = new Frame({
       transform: {
-        translateX: "0px",
-        translateY: "0px",
-        rotate: "0deg",
+        translateX: '0px',
+        translateY: '0px',
+        rotate: '0deg',
         scaleX: 1,
-        scaleY: 1
-      }
+        scaleY: 1,
+      },
     });
 
     this.frameMap.set(el, frame);
@@ -143,9 +138,9 @@ export default class ArtBoard extends React.PureComponent<
     //     frame.translate[1]
     // }px) rotate(${frame.rotate}deg)`;
 
-    target.style.cssText += this.getFrame(target as
-      | HTMLElement
-      | SVGAElement).toCSS();
+    target.style.cssText += this.getFrame(
+      target as HTMLElement | SVGAElement
+    ).toCSS();
   };
 
   private dragSelector: any;
@@ -162,8 +157,8 @@ export default class ArtBoard extends React.PureComponent<
         this.setState({
           selectables: {
             ...this.state.selectables,
-            [id]: element
-          }
+            [id]: element,
+          },
         });
       });
     }
@@ -189,7 +184,7 @@ export default class ArtBoard extends React.PureComponent<
     this.tooltip = this.createTooltip();
 
     // setup guides
-    window.addEventListener("resize", () => {
+    window.addEventListener('resize', () => {
       if (this.guides1) {
         this.guides1.resize();
       }
@@ -200,36 +195,36 @@ export default class ArtBoard extends React.PureComponent<
     });
 
     const keycon = new KeyController(window);
-    keycon.keydown(["ctrl", "a"], event => {
-      console.log("ctrl + A", event);
+    keycon.keydown(['ctrl', 'a'], (event) => {
+      console.log('ctrl + A', event);
     });
 
     keycon
-      .keydown("shift", () => {
+      .keydown('shift', () => {
         this.setState({ shiftKey: true });
       })
-      .keyup("shift", () => {
+      .keyup('shift', () => {
         this.setState({ shiftKey: false });
       });
 
     keycon
-      .keydown("ctrl", () => {
+      .keydown('ctrl', () => {
         this.setState({ ctrlKey: true });
       })
-      .keyup("ctrl", () => {
+      .keyup('ctrl', () => {
         this.setState({ ctrlKey: false });
       });
 
     keycon
-      .keydown("r", () => {
+      .keydown('r', () => {
         if (!this.state.rKey) {
-          console.log("r key press");
+          console.log('r key press');
           this.setState({ rKey: true });
         }
       })
-      .keyup("r", () => {
+      .keyup('r', () => {
         if (this.state.rKey) {
-          console.log("r key up");
+          console.log('r key up');
           this.setState({ rKey: false });
         }
       });
@@ -247,15 +242,15 @@ export default class ArtBoard extends React.PureComponent<
       this.state.lastSelectElement.time &&
       new Date().getTime() - this.state.lastSelectElement.time < 250
     ) {
-      if (typeof this.props.onArtBoardDoubleClick === "function") {
+      if (typeof this.props.onArtBoardDoubleClick === 'function') {
         this.props.onArtBoardDoubleClick();
       }
     } else {
       this.setState({
         lastSelectElement: {
           time: new Date().getTime(),
-          element: newTarget
-        }
+          element: newTarget,
+        },
       });
     }
     let nextState: Targets = this.state.target || [];
@@ -296,14 +291,14 @@ export default class ArtBoard extends React.PureComponent<
   private onTargetChange: any = (newTarget: any, callback?: Function) => {
     this.setState(
       {
-        target: newTarget
+        target: newTarget,
       },
       () => {
-        if (typeof callback === "function") {
+        if (typeof callback === 'function') {
           callback();
         }
 
-        if (typeof this.props.onTargetCountChange === "function") {
+        if (typeof this.props.onTargetCountChange === 'function') {
           this.props.onTargetCountChange(
             this.state.target ? this.state.target.length : 0
           );
@@ -320,9 +315,9 @@ export default class ArtBoard extends React.PureComponent<
     targets,
     target,
     isTarget,
-    targetIndex
+    targetIndex,
   }: OnClickGroup) => {
-    if (!inputTarget.classList.contains("element__wrapper")) {
+    if (!inputTarget.classList.contains('element__wrapper')) {
       return;
     }
 
@@ -361,14 +356,14 @@ export default class ArtBoard extends React.PureComponent<
     targets,
     isDrag,
     clientX,
-    clientY
+    clientY,
   }: OnDragGroupEnd) => {
     this.unLockSelector();
     this.hideTooltip();
   };
   private handleResizeGroupStart: any = ({
     targets,
-    events
+    events,
   }: OnResizeGroupStart) => {
     this.lockSelector();
     events.forEach(this.handleResizeStart);
@@ -387,11 +382,11 @@ export default class ArtBoard extends React.PureComponent<
   artBoard: HTMLElement | null = null;
 
   createTooltip = () => {
-    const tooltip = document.createElement("div");
+    const tooltip = document.createElement('div');
 
-    tooltip.id = "lf-m-tooltip";
-    tooltip.className = "lf__tooltip";
-    tooltip.style.display = "none";
+    tooltip.id = 'lf-m-tooltip';
+    tooltip.className = 'lf__tooltip';
+    tooltip.style.display = 'none';
     const area = this.artBoard;
     if (area) {
       area.appendChild(tooltip);
@@ -402,15 +397,16 @@ export default class ArtBoard extends React.PureComponent<
 
   setTooltipContent = (clientX: number, clientY: number, text: string) => {
     if (this.tooltip) {
-      this.tooltip.style.cssText = `display: block; transform: translate(${clientX +
-        50}px, ${clientY - 10}px) translate(-100%, -100%);`;
+      this.tooltip.style.cssText = `display: block; transform: translate(${
+        clientX + 50
+      }px, ${clientY - 10}px) translate(-100%, -100%);`;
       this.tooltip.innerHTML = text;
     }
   };
 
   hideTooltip = () => {
     if (this.tooltip) {
-      this.tooltip.style.display = "none";
+      this.tooltip.style.display = 'none';
     }
   };
 
@@ -426,8 +422,8 @@ export default class ArtBoard extends React.PureComponent<
     this.lockSelector();
     const frame = this.getFrame(target as HTMLElement | SVGAElement);
     set([
-      parseFloat(frame.get("transform", "translateX")),
-      parseFloat(frame.get("transform", "translateY"))
+      parseFloat(frame.get('transform', 'translateX')),
+      parseFloat(frame.get('transform', 'translateY')),
     ]);
   };
 
@@ -440,18 +436,18 @@ export default class ArtBoard extends React.PureComponent<
     top,
     clientX,
     clientY,
-    isPinch
+    isPinch,
   }: OnDrag) => {
     const frame = this.getFrame(target as HTMLElement | SVGAElement);
     if (this.state.shiftKey) {
       if (delta[0] !== 0) {
-        frame.set("transform", "translateX", `${beforeTranslate[0]}px`);
+        frame.set('transform', 'translateX', `${beforeTranslate[0]}px`);
       } else if (delta[1] !== 0) {
-        frame.set("transform", "translateY", `${beforeTranslate[1]}px`);
+        frame.set('transform', 'translateY', `${beforeTranslate[1]}px`);
       }
     } else {
-      frame.set("transform", "translateX", `${beforeTranslate[0]}px`);
-      frame.set("transform", "translateY", `${beforeTranslate[1]}px`);
+      frame.set('transform', 'translateX', `${beforeTranslate[0]}px`);
+      frame.set('transform', 'translateY', `${beforeTranslate[1]}px`);
     }
 
     if (!isPinch) {
@@ -471,13 +467,13 @@ export default class ArtBoard extends React.PureComponent<
   private handleResizeStart: any = ({
     target,
     setOrigin,
-    dragStart
+    dragStart,
   }: OnResizeStart) => {
     this.lockSelector();
-    setOrigin(["%", "%"]);
+    setOrigin(['%', '%']);
     const frame = this.getFrame(target as HTMLElement | SVGAElement);
     if (dragStart) {
-      dragStart.set([parseFloat(frame.get("tx")), parseFloat(frame.get("ty"))]);
+      dragStart.set([parseFloat(frame.get('tx')), parseFloat(frame.get('ty'))]);
     }
   };
 
@@ -488,13 +484,13 @@ export default class ArtBoard extends React.PureComponent<
     drag,
     clientX,
     clientY,
-    isPinch
+    isPinch,
   }: OnResize) => {
     const frame = this.getFrame(target as HTMLElement | SVGAElement);
-    frame.set("width", `${width}px`);
-    frame.set("height", `${height}px`);
-    frame.set("tx", `${drag.beforeTranslate[0]}px`);
-    frame.set("ty", `${drag.beforeTranslate[1]}px`);
+    frame.set('width', `${width}px`);
+    frame.set('height', `${height}px`);
+    frame.set('tx', `${drag.beforeTranslate[0]}px`);
+    frame.set('ty', `${drag.beforeTranslate[1]}px`);
 
     // target.style.cssText += frame.toCSS();
 
@@ -516,7 +512,7 @@ export default class ArtBoard extends React.PureComponent<
     this.lockSelector();
 
     const frame = this.getFrame(target as HTMLElement | SVGAElement);
-    set(parseFloat(frame.get("transform", "rotate")));
+    set(parseFloat(frame.get('transform', 'rotate')));
   };
 
   private handleRotate: any = ({
@@ -525,7 +521,7 @@ export default class ArtBoard extends React.PureComponent<
     clientX,
     clientY,
     isPinch,
-    beforeDelta
+    beforeDelta,
   }: OnRotate) => {
     // const deg = parseFloat(this.state.frame.rotate) + beforeDelta;
     // if (!isPinch) {
@@ -533,8 +529,8 @@ export default class ArtBoard extends React.PureComponent<
     // }
 
     const frame = this.getFrame(target as HTMLElement | SVGAElement);
-    const deg = parseFloat(frame.get("transform", "rotate")) + beforeDelta;
-    frame.set("transform", "rotate", `${deg}deg`);
+    const deg = parseFloat(frame.get('transform', 'rotate')) + beforeDelta;
+    frame.set('transform', 'rotate', `${deg}deg`);
     target.style.cssText += frame.toCSS();
     this.moveable.updateRect();
   };
@@ -546,14 +542,14 @@ export default class ArtBoard extends React.PureComponent<
 
   private handleRotateGroupStart: any = ({
     targets,
-    events
+    events,
   }: OnRotateGroupStart) => {
     this.lockSelector();
     events.forEach(({ target, set, dragStart }) => {
       const frame = this.getFrame(target as HTMLElement | SVGAElement);
-      const tx = parseFloat(frame.get("transform", "translateX")) || 0;
-      const ty = parseFloat(frame.get("transform", "translateY")) || 0;
-      const rotate = parseFloat(frame.get("transform", "rotate")) || 0;
+      const tx = parseFloat(frame.get('transform', 'translateX')) || 0;
+      const ty = parseFloat(frame.get('transform', 'translateY')) || 0;
+      const rotate = parseFloat(frame.get('transform', 'rotate')) || 0;
 
       set(rotate);
 
@@ -567,22 +563,22 @@ export default class ArtBoard extends React.PureComponent<
   private handleRotateGroup: any = ({
     targets,
     events,
-    set
+    set,
   }: OnRotateGroup) => {
     // events.forEach(this.handleRotate);
     events.forEach(({ target, beforeRotate, drag }) => {
       const frame = this.getFrame(target as HTMLElement | SVGAElement);
       const beforeTranslate = drag.beforeTranslate;
 
-      frame.set("transform", "rotate", `${beforeRotate}deg`);
-      frame.set("transform", "translateX", `${beforeTranslate[0]}px`);
-      frame.set("transform", "translateY", `${beforeTranslate[1]}px`);
+      frame.set('transform', 'rotate', `${beforeRotate}deg`);
+      frame.set('transform', 'translateX', `${beforeTranslate[0]}px`);
+      frame.set('transform', 'translateY', `${beforeTranslate[1]}px`);
       target.style.cssText += frame.toCSS();
     });
   };
   private handleRotateGroupEnd: any = ({
     targets,
-    isDrag
+    isDrag,
   }: OnRotateGroupEnd) => {
     this.unLockSelector();
   };
@@ -591,7 +587,7 @@ export default class ArtBoard extends React.PureComponent<
     const { target } = this.state;
 
     if (target && target.length > 0) {
-      const baseElement: HTMLElement | SVGAElement = target[0];
+      const baseElement: HTMLElement | SVGAElement | any = target[0];
       if (target.length > 1) {
         // alignment to selection
         if (baseElement) {
@@ -603,33 +599,33 @@ export default class ArtBoard extends React.PureComponent<
               if (frame) {
                 // old transform
                 const oldTransformX = parseFloat(
-                  frame.get("transform", "translateX")
+                  frame.get('transform', 'translateX')
                 );
                 const oldTransformY = parseFloat(
-                  frame.get("transform", "translateY")
+                  frame.get('transform', 'translateY')
                 );
                 let translateX = 0;
                 let translateY = 0;
-                if (alignment === "left") {
+                if (alignment === 'left') {
                   translateX = baseElementRect.x - currentRect.x;
-                } else if (alignment === "center") {
+                } else if (alignment === 'center') {
                   translateX =
                     baseElementRect.x +
                     baseElementRect.width / 2 -
                     (currentRect.x + currentRect.width / 2);
-                } else if (alignment === "right") {
+                } else if (alignment === 'right') {
                   translateX =
                     baseElementRect.x -
                     currentRect.x +
                     (baseElementRect.width - currentRect.width);
-                } else if (alignment === "top") {
+                } else if (alignment === 'top') {
                   translateY = baseElementRect.y - currentRect.y;
-                } else if (alignment === "middle") {
+                } else if (alignment === 'middle') {
                   translateY =
                     baseElementRect.y +
                     baseElementRect.height / 2 -
                     (currentRect.y + currentRect.height / 2);
-                } else if (alignment === "bottom") {
+                } else if (alignment === 'bottom') {
                   translateY =
                     baseElementRect.y +
                     baseElementRect.height -
@@ -639,16 +635,16 @@ export default class ArtBoard extends React.PureComponent<
 
                 if (translateX !== 0) {
                   frame.set(
-                    "transform",
-                    "translateX",
+                    'transform',
+                    'translateX',
                     `${oldTransformX + translateX}px`
                   );
                 }
 
                 if (translateY !== 0) {
                   frame.set(
-                    "transform",
-                    "translateY",
+                    'transform',
+                    'translateY',
                     `${oldTransformY + translateY}px`
                   );
                 }
@@ -662,23 +658,26 @@ export default class ArtBoard extends React.PureComponent<
         }
       } else if (target.length === 1) {
         // alignment to art board
-        alert("should align to art board");
+        alert('should align to art board');
       }
     }
   }
 
   private distributeElements = (
-    elements: (HTMLElement | SVGAElement)[],
+    elements: (HTMLElement | SVGAElement | any)[],
     distribution: string
   ) => {
     if (elements && elements.length > 0) {
       if (elements.length > 2) {
-        let firstElement: HTMLElement | SVGAElement | null = null;
-        let lastElement: HTMLElement | SVGAElement | null = null;
-        if (distribution === "vertical") {
+        let firstElement: HTMLElement | SVGAElement | null | any = null;
+        let lastElement: HTMLElement | SVGAElement | null | any = null;
+        if (distribution === 'vertical') {
           // we need to sort elements by the y coordination of middle line
           elements.sort(
-            (e1: HTMLElement | SVGAElement, e2: HTMLElement | SVGAElement) => {
+            (
+              e1: HTMLElement | SVGAElement | any,
+              e2: HTMLElement | SVGAElement | any
+            ) => {
               const e1Rect = e1.getBoundingClientRect();
               const e2Rect = e2.getBoundingClientRect();
 
@@ -714,11 +713,11 @@ export default class ArtBoard extends React.PureComponent<
               if (frame) {
                 // old transform
                 const oldTransformY = parseFloat(
-                  frame.get("transform", "translateY")
+                  frame.get('transform', 'translateY')
                 );
                 frame.set(
-                  "transform",
-                  "translateY",
+                  'transform',
+                  'translateY',
                   `${oldTransformY - (oldDistance - averageSpacing * i)}px`
                 );
 
@@ -728,10 +727,13 @@ export default class ArtBoard extends React.PureComponent<
             }
             this.moveable.updateRect();
           }
-        } else if (distribution === "horizontal") {
+        } else if (distribution === 'horizontal') {
           // we need to sort elements by the y coordination of middle line
           elements.sort(
-            (e1: HTMLElement | SVGAElement, e2: HTMLElement | SVGAElement) => {
+            (
+              e1: HTMLElement | SVGAElement | any,
+              e2: HTMLElement | SVGAElement | any
+            ) => {
               const e1Rect = e1.getBoundingClientRect();
               const e2Rect = e2.getBoundingClientRect();
 
@@ -767,11 +769,11 @@ export default class ArtBoard extends React.PureComponent<
               if (frame) {
                 // old transform
                 const oldTransformX = parseFloat(
-                  frame.get("transform", "translateX")
+                  frame.get('transform', 'translateX')
                 );
                 frame.set(
-                  "transform",
-                  "translateX",
+                  'transform',
+                  'translateX',
                   `${oldTransformX - (oldDistance - averageSpacing * i)}px`
                 );
 
@@ -797,8 +799,8 @@ export default class ArtBoard extends React.PureComponent<
 
     return (
       <MoveAble
-        ref={ref(this, "moveable")}
-        // edge={true}
+        ref={ref(this, 'moveable')}
+        edge={true}
         target={this.state.target}
         draggable={true}
         snappable={true}
@@ -839,6 +841,7 @@ export default class ArtBoard extends React.PureComponent<
         onRotateGroupStart={this.handleRotateGroupStart}
         onRotateGroup={this.handleRotateGroup}
         onRotateGroupEnd={this.handleRotateGroupEnd}
+        bounds={{ left: 0, top: 0, right: 1200, bottom: 500 }}
       />
     );
   };
@@ -847,31 +850,33 @@ export default class ArtBoard extends React.PureComponent<
     return (
       <React.Fragment>
         <div className="box" />
-        <div className={classNames("ruler", "horizontal")}>
+        <div className={classNames('ruler', 'horizontal')}>
           <Guides
-            ref={ref(this, "guides1")}
+            ref={ref(this, 'guides1')}
             type="horizontal"
             rulerStyle={{
-              left: "20px",
-              width: "calc(100% - 20px)",
-              height: "100%"
+              left: '20px',
+              width: 'calc(100% - 20px)',
+              height: '100%',
             }}
-            setGuides={guides => {
-              this.setState({ horizontalGuidelines: guides.map(g => g + 20) });
+            setGuides={(guides) => {
+              this.setState({
+                horizontalGuidelines: guides.map((g) => g + 20),
+              });
             }}
           />
         </div>
-        <div className={classNames("ruler", "vertical")}>
+        <div className={classNames('ruler', 'vertical')}>
           <Guides
-            ref={ref(this, "guides2")}
+            ref={ref(this, 'guides2')}
             type="vertical"
             rulerStyle={{
-              top: "0",
-              height: "100%",
-              width: "100%"
+              top: '0',
+              height: '100%',
+              width: '100%',
             }}
-            setGuides={guides => {
-              this.setState({ verticalGuidelines: guides.map(g => g + 20) });
+            setGuides={(guides) => {
+              this.setState({ verticalGuidelines: guides.map((g) => g + 20) });
             }}
           />
         </div>
@@ -880,7 +885,7 @@ export default class ArtBoard extends React.PureComponent<
   };
 
   renderLoading = () => {
-    return <span>{"Fake loading..."}</span>;
+    return <span>{'Fake loading...'}</span>;
   };
 
   renderDemo = () => {
@@ -890,72 +895,78 @@ export default class ArtBoard extends React.PureComponent<
 
     const customElement = (
       <BaseElement
-        key={`custom__element`}
+        key={`custom__element__1`}
         style={{
           top: 30,
           left: 100,
-          backgroundColor: "#aaa",
-          padding: 10
         }}
         onMounted={this.handleChildMounted}
         onUnmounted={this.handleChildUnmounted}
       >
-        <div>
-          <div>
-            <p>This is paragraph</p>
-          </div>
-          <button>Button</button>
-        </div>
+        <button>Button</button>
       </BaseElement>
     );
 
     const customElement2 = (
       <BaseElement
-        key={`custom__element`}
+        key={`custom__element__2`}
         style={{
           top: 30,
           left: 250,
-          backgroundColor: "#aaa",
-          padding: 10
         }}
         onMounted={this.handleChildMounted}
         onUnmounted={this.handleChildUnmounted}
       >
-        <div>
-          <img
-            alt="test"
-            src="https://hackernoon.com/hn-images/1*OVenkpgBSpBJKwgwRwrYkg.jpeg"
-            height={150}
-            width={150}
-          />
-        </div>
+        <img
+          alt="test"
+          src="https://znews-photo.zadn.vn/w960/Uploaded/ofh_cgmzstgk/2020_07_30/moonbar6.jpg"
+          style={{
+            height: '100%',
+            width: '100%',
+          }}
+        />
       </BaseElement>
     );
 
-    demoElements.push(customElement);
-    demoElements.push(customElement2);
+    const customElement3 = (
+      <BaseElement
+        key={`custom__element__3`}
+        style={{
+          top: 30,
+          left: 500,
+        }}
+        onMounted={this.handleChildMounted}
+        onUnmounted={this.handleChildUnmounted}
+      >
+        <div>Nghiep Test</div>
+      </BaseElement>
+    );
 
-    let index = 0;
-    for (let column = 0; column < 4; column++) {
-      for (let i = 0; i < 30; i++) {
-        index++;
-        demoElements.push(
-          <BaseElement
-            key={`column__${column}_element__${i}`}
-            style={{
-              top: i === 0 ? 250 : i * 150 + 100,
-              left: column * 150 + 60,
-              backgroundColor: "#aaa",
-              padding: 10
-            }}
-            onMounted={this.handleChildMounted}
-            onUnmounted={this.handleChildUnmounted}
-          >
-            <div>{`test__${index}`}</div>
-          </BaseElement>
-        );
-      }
-    }
+    demoElements.push(customElement2);
+    demoElements.push(customElement);
+    demoElements.push(customElement3);
+
+    // let index = 0;
+    // for (let column = 0; column < 4; column++) {
+    //   for (let i = 0; i < 30; i++) {
+    //     index++;
+    //     demoElements.push(
+    //       <BaseElement
+    //         key={`column__${column}_element__${i}`}
+    //         style={{
+    //           top: i === 0 ? 250 : i * 150 + 100,
+    //           left: column * 150 + 60,
+    //           backgroundColor: '#aaa',
+    //           padding: 10,
+    //         }}
+    //         onMounted={this.handleChildMounted}
+    //         onUnmounted={this.handleChildUnmounted}
+    //       >
+    //         <div>{`test__${index}`}</div>
+    //       </BaseElement>
+    //     );
+    //   }
+    // }
 
     return demoElements;
   };
@@ -964,7 +975,7 @@ export default class ArtBoard extends React.PureComponent<
     const { viewMode } = this.props;
 
     return (
-      <div className={classNames("art_board_area", `art_board__${viewMode}`)}>
+      <div className={classNames('art_board_area', `art_board__${viewMode}`)}>
         {this.renderDemo()}
       </div>
     );
@@ -976,16 +987,18 @@ export default class ArtBoard extends React.PureComponent<
       <React.Fragment>
         <div
           ref={this.handleArtBoardRef}
-          className={classNames("art_board_wrapper", {
+          className={classNames('art_board_wrapper', {
             art_board__loading: isLoading,
-            show__ruler: showRuler
+            show__ruler: showRuler,
           })}
         >
           {isLoading && this.renderLoading()}
           {!isLoading && this.renderContent()}
           {this.renderMoveable()}
         </div>
-        {!isLoading && showRuler && this.renderGuides()}
+        {/* render ruler */}
+        {/* {!isLoading && showRuler && this.renderGuides()} */}
+        {/* end render ruler */}
         <ReactDragSelectable
           ref={this.handleDragSelectRef}
           container={this.artBoard}

@@ -1,6 +1,8 @@
 .art_board_wrapper {
   position: relative;
-  height: 100%;
+  width: 1200px;
+  height: 500px;
+  border: solid 1px #ee2624;
 
   &.show__ruler {
       margin-top: 20px;

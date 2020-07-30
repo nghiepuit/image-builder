@@ -1,8 +1,7 @@
-import React from "react";
-import classNames from "classnames";
-import uuid from "uuid";
-
-import "./style.scss";
+import classNames from 'classnames';
+import React from 'react';
+import { v4 } from 'uuid';
+import './style.scss';
 
 export type ElementProps = {
   id?: string;
@@ -30,21 +29,21 @@ export default class BaseElement extends React.PureComponent<
   state: ElementState = {
     frame: {
       translate: [0, 0, 0],
-      rotate: 0
+      rotate: 0,
     },
-    isSelected: false
+    isSelected: false,
   };
 
-  private id: string = uuid();
+  private id = v4();
 
   componentDidMount(): void {
-    if (typeof this.props.onMounted === "function") {
+    if (typeof this.props.onMounted === 'function') {
       this.props.onMounted(this.id, this.wrapper);
     }
   }
 
   componentWillUnmount() {
-    if (typeof this.props.onUnmounted === "function") {
+    if (typeof this.props.onUnmounted === 'function') {
       this.props.onUnmounted(this.id, this.wrapper);
     }
   }
@@ -61,8 +60,8 @@ export default class BaseElement extends React.PureComponent<
       <React.Fragment>
         <div
           ref={this.handleWrapperRef}
-          className={classNames("element__wrapper", {
-            element__selected: this.state.isSelected
+          className={classNames('element__wrapper', {
+            element__selected: this.state.isSelected,
           })}
           style={this.props.style}
           data-key={id}
